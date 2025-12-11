@@ -1,0 +1,466 @@
+{
+  "fileTypes": {
+    "LOG": "LOG*",
+    "SLOWLOG": "pika.ERROR*"
+  },
+  "bucket": "10m",
+  "groups": [
+    {
+      "out": "chart_db_wal.svg",
+      "title": "DB Ingest / WAL (MB/s)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "DB_Ingest_MBps_Sum",
+        "WAL_MBps_Sum"
+      ]
+    },
+    {
+      "out": "chart_bc_ratio.svg",
+      "title": "Block Cache Hit Ratio (Hit/(Hit+Miss))",
+      "type": "LOG",
+      "agg": "expr",
+      "exprs": [
+        { "name": "BC_Hit_Ratio", "formula": "BC_Hit_Cum_Delta / (BC_Hit_Cum_Delta + BC_Miss_Cum_Delta)" }
+      ],
+      "names": [
+        "BC_Hit_Ratio"
+      ]
+    },
+    {
+      "out": "chart_stat_p99.svg",
+      "title": "STATISTICS P99 (us, avg per bucket)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "TableOpenIO_P99_us_Avg",
+        "Compaction_Outfile_Sync_P99_us_Avg",
+        "Manifest_Sync_P99_us_Avg",
+        "Read_Block_Get_P99_us_Avg",
+        "SST_Read_P99_us_Avg",
+        "DB_Get_P99_us_Avg",
+        "DB_Write_P99_us_Avg",
+        "DB_Seek_P99_us_Avg"
+      ]
+    },
+    {
+      "out": "chart_stat_counters_delta.svg",
+      "title": "STATISTICS Counters (delta per bucket)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "DB_Seek_Cum_Delta",
+        "DB_Next_Cum_Delta",
+        "BC_Hit_Cum_Delta",
+        "BC_Miss_Cum_Delta",
+        "File_Opens_Cum_Delta"
+      ]
+    },
+    {
+      "out": "chart_bc_hit_ratio.svg",
+      "title": "Block Cache Hit Ratio (Hit/(Hit+Miss))",
+      "type": "LOG",
+      "agg": "delta",
+      "exprs": [
+        {
+          "name": "BC_Hit_Ratio",
+          "formula": "BC_Hit_Cum_Delta/(BC_Hit_Cum_Delta+BC_Miss_Cum_Delta)"
+        }
+      ],
+      "names": [
+        "BC_Hit_Ratio"
+      ]
+    },
+    {
+      "out": "chart_compaction_cum_delta.svg",
+      "title": "Compaction IO (delta of cumulative GB)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "Cum_Compaction_Write_GB_default_Delta",
+        "Cum_Compaction_Read_GB_default_Delta",
+        "Cum_Compaction_Write_GB_data_cf_Delta",
+        "Cum_Compaction_Read_GB_data_cf_Delta"
+      ]
+    },
+    {
+      "out": "chart_events_count.svg",
+      "title": "Events (count per bucket)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Event_*_Count"
+      ]
+    },
+    {
+      "out": "chart_events_stall.svg",
+      "title": "Stall Events (count per bucket)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Event_PendingCompactionBytes_Stall_Count"
+      ]
+    },
+    {
+      "out": "chart_bpr_p99.svg",
+      "title": "Bytes per Read (P99)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "BytesPerRead_P99_Avg"
+      ]
+    },
+    {
+      "out": "chart_bloom_delta.svg",
+      "title": "Bloom Useful (delta)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "Bloom_Useful_Cum_Delta"
+      ]
+    },
+    {
+      "out": "chart_read_ops_delta.svg",
+      "title": "Read Ops (seek/next delta)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "DB_Seek_Cum_Delta",
+        "DB_Next_Cum_Delta"
+      ]
+    },
+    {
+      "out": "chart_slowlog_cmds.svg",
+      "title": "Slowlog Commands (count per bucket)",
+      "type": "SLOWLOG",
+      "agg": "count",
+      "names": [
+        "Slow_Command_*"
+      ]
+    },
+    {
+      "out": "chart_slowlog_hot.svg",
+      "title": "Hot Slow Commands (count per bucket)",
+      "type": "SLOWLOG",
+      "agg": "count",
+      "names": [
+        "Slow_Command_GET*",
+        "Slow_Command_SET*",
+        "Slow_Command_MGET*",
+        "Slow_Command_DEL*",
+        "Slow_Command_HGET*",
+        "Slow_Command_HMGET*",
+        "Slow_Command_ZADD*",
+        "Slow_Command_ZRANGE*",
+        "Slow_Command_EXPIRE*"
+      ]
+    },
+    {
+      "out": "chart_data_cf_gb.svg",
+      "title": "data_cf Interval GB",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Compaction_Write_GB_data_cf_Sum",
+        "Compaction_Read_GB_data_cf_Sum",
+        "Flush_GB_data_cf_Sum",
+        "Add_GB_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_data_cf_rates.svg",
+      "title": "data_cf Rates (MB/s)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Compaction_Write_MBps_data_cf_Sum",
+        "Compaction_Read_MBps_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_data_cf_size.svg",
+      "title": "data_cf Per-level Size (MB)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Size_MB_data_cf_Sum",
+        "Level1_Size_MB_data_cf_Sum",
+        "Level2_Size_MB_data_cf_Sum",
+        "Level3_Size_MB_data_cf_Sum",
+        "Level4_Size_MB_data_cf_Sum",
+        "Level5_Size_MB_data_cf_Sum",
+        "Level6_Size_MB_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_data_cf_files.svg",
+      "title": "data_cf Per-level Files",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Files_data_cf_Sum",
+        "Level1_Files_data_cf_Sum",
+        "Level2_Files_data_cf_Sum",
+        "Level3_Files_data_cf_Sum",
+        "Level4_Files_data_cf_Sum",
+        "Level5_Files_data_cf_Sum",
+        "Level6_Files_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_readp99_data_cf.svg",
+      "title": "Per-level Read Latency P99 (data_cf) (us)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "Data_L0_Read_P99_us_Avg",
+        "Data_L1_Read_P99_us_Avg",
+        "Data_L2_Read_P99_us_Avg",
+        "Data_L3_Read_P99_us_Avg",
+        "Data_L4_Read_P99_us_Avg",
+        "Data_L5_Read_P99_us_Avg",
+        "Data_L6_Read_P99_us_Avg"
+      ]
+    },
+    {
+      "out": "chart_data_cf_wamp.svg",
+      "title": "Per-level W-Amp (data_cf)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_WAmp_data_cf_Sum",
+        "Level1_WAmp_data_cf_Sum",
+        "Level2_WAmp_data_cf_Sum",
+        "Level3_WAmp_data_cf_Sum",
+        "Level4_WAmp_data_cf_Sum",
+        "Level5_WAmp_data_cf_Sum",
+        "Level6_WAmp_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_data_cf_rd.svg",
+      "title": "Per-level Rd (data_cf) (MB/s)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Rd_MBps_data_cf_Sum",
+        "Level1_Rd_MBps_data_cf_Sum",
+        "Level2_Rd_MBps_data_cf_Sum",
+        "Level3_Rd_MBps_data_cf_Sum",
+        "Level4_Rd_MBps_data_cf_Sum",
+        "Level5_Rd_MBps_data_cf_Sum",
+        "Level6_Rd_MBps_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_stalls_data_cf.svg",
+      "title": "Stalls (data_cf) (count Δ)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "Stalls_L0_Slowdown_Delta",
+        "Stalls_L0_SlowdownWithCompaction_Delta",
+        "Stalls_L0_NumFiles_Delta",
+        "Stalls_L0_NumFilesWithCompaction_Delta",
+        "Stalls_Stop_PendingBytes_Delta",
+        "Stalls_Slowdown_PendingBytes_Delta",
+        "Stalls_MemtableCompaction_Delta",
+        "Stalls_MemtableSlowdown_Delta"
+      ]
+    },
+    {
+      "out": "chart_addcounts_data_cf.svg",
+      "title": "AddFile Counts (data_cf) (count)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Add_TotalFiles_data_cf_Sum",
+        "Add_L0Files_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_size_delta.svg",
+      "title": "default CF Per-level Size Delta (MB)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "Level0_Size_MB_default_Delta",
+        "Level1_Size_MB_default_Delta",
+        "Level2_Size_MB_default_Delta",
+        "Level3_Size_MB_default_Delta",
+        "Level4_Size_MB_default_Delta",
+        "Level5_Size_MB_default_Delta",
+        "Level6_Size_MB_default_Delta"
+      ]
+    },
+    {
+      "out": "chart_data_cf_size_delta.svg",
+      "title": "data_cf Per-level Size Delta (MB)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "Level0_Size_MB_data_cf_Delta",
+        "Level1_Size_MB_data_cf_Delta",
+        "Level2_Size_MB_data_cf_Delta",
+        "Level3_Size_MB_data_cf_Delta",
+        "Level4_Size_MB_data_cf_Delta",
+        "Level5_Size_MB_data_cf_Delta",
+        "Level6_Size_MB_data_cf_Delta"
+      ]
+    },
+    {
+      "out": "chart_comp_eff_data_cf.svg",
+      "title": "Compaction Efficiency (data_cf) (W/(F+Add))",
+      "type": "LOG",
+      "agg": "sum",
+      "exprs": [
+        {
+          "name": "Compaction_Eff_data_cf",
+          "formula": "Compaction_Write_GB_data_cf_Sum/(Flush_GB_data_cf_Sum+Add_GB_data_cf_Sum)"
+        }
+      ],
+      "names": [
+        "Compaction_Eff_data_cf"
+      ]
+    },
+    {
+      "out": "chart_default_cf_gb.svg",
+      "title": "default CF Interval GB",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Compaction_Write_GB_default_Sum",
+        "Compaction_Read_GB_default_Sum",
+        "Flush_GB_default_Sum",
+        "Add_GB_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_rates.svg",
+      "title": "default CF Rates (MB/s)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Compaction_Write_MBps_default_Sum",
+        "Compaction_Read_MBps_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_size.svg",
+      "title": "default CF Per-level Size (MB)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Size_MB_default_Sum",
+        "Level1_Size_MB_default_Sum",
+        "Level2_Size_MB_default_Sum",
+        "Level3_Size_MB_default_Sum",
+        "Level4_Size_MB_default_Sum",
+        "Level5_Size_MB_default_Sum",
+        "Level6_Size_MB_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_files.svg",
+      "title": "default CF Per-level Files",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Files_default_Sum",
+        "Level1_Files_default_Sum",
+        "Level2_Files_default_Sum",
+        "Level3_Files_default_Sum",
+        "Level4_Files_default_Sum",
+        "Level5_Files_default_Sum",
+        "Level6_Files_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_readp99_default.svg",
+      "title": "Per-level Read Latency P99 (default) (us)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "Def_L0_Read_P99_us_Avg",
+        "Def_L1_Read_P99_us_Avg",
+        "Def_L2_Read_P99_us_Avg",
+        "Def_L3_Read_P99_us_Avg",
+        "Def_L4_Read_P99_us_Avg",
+        "Def_L5_Read_P99_us_Avg",
+        "Def_L6_Read_P99_us_Avg"
+      ]
+    },
+    {
+      "out": "chart_stalls_default.svg",
+      "title": "Stalls (default) (count Δ)",
+      "type": "LOG",
+      "agg": "delta",
+      "names": [
+        "Def_Stalls_L0_Slowdown_Delta",
+        "Def_Stalls_L0_SlowdownWithCompaction_Delta",
+        "Def_Stalls_L0_NumFiles_Delta",
+        "Def_Stalls_L0_NumFilesWithCompaction_Delta",
+        "Def_Stalls_Stop_PendingBytes_Delta",
+        "Def_Stalls_Slowdown_PendingBytes_Delta",
+        "Def_Stalls_MemtableCompaction_Delta",
+        "Def_Stalls_MemtableSlowdown_Delta"
+      ]
+    },
+    {
+      "out": "chart_default_cf_wamp.svg",
+      "title": "Per-level W-Amp (default)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_WAmp_default_Sum",
+        "Level1_WAmp_default_Sum",
+        "Level2_WAmp_default_Sum",
+        "Level3_WAmp_default_Sum",
+        "Level4_WAmp_default_Sum",
+        "Level5_WAmp_default_Sum",
+        "Level6_WAmp_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_rd.svg",
+      "title": "Per-level Rd (default) (MB/s)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Rd_MBps_default_Sum",
+        "Level1_Rd_MBps_default_Sum",
+        "Level2_Rd_MBps_default_Sum",
+        "Level3_Rd_MBps_default_Sum",
+        "Level4_Rd_MBps_default_Sum",
+        "Level5_Rd_MBps_default_Sum",
+        "Level6_Rd_MBps_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_addcounts_default.svg",
+      "title": "AddFile Counts (default) (count)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Add_TotalFiles_default_Sum",
+        "Add_L0Files_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_comp_eff_default.svg",
+      "title": "Compaction Efficiency (default) (W/(F+Add))",
+      "type": "LOG",
+      "agg": "sum",
+      "exprs": [
+        {
+          "name": "Compaction_Eff_default",
+          "formula": "Compaction_Write_GB_default_Sum/(Flush_GB_default_Sum+Add_GB_default_Sum)"
+        }
+      ],
+      "names": [
+        "Compaction_Eff_default"
+      ]
+    }
+  ]
+}
+
