@@ -298,7 +298,7 @@ func main() {
 			}
 			if doAggregate {
 				allMetrics = append(allMetrics, ms...)
-			} else if metricsOut != "" || chartOut != "" {
+			} else if metricsOut != "" || chartOut != "" || chartsConfig != "" || chartsSpec != "" {
 				allMetrics = append(allMetrics, ms...)
 			}
 			printItem(item)

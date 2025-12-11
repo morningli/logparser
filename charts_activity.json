@@ -28,19 +28,28 @@
       ]
     },
     {
-      "out": "chart_stat_p99.svg",
-      "title": "STATISTICS P99 (us, avg per bucket)",
+      "out": "chart_stat_p99_read.svg",
+      "title": "STATISTICS P99 Read (us, avg)",
       "type": "LOG",
       "agg": "avg",
       "names": [
-        "TableOpenIO_P99_us_Avg",
-        "Compaction_Outfile_Sync_P99_us_Avg",
-        "Manifest_Sync_P99_us_Avg",
+        "DB_Get_P99_us_Avg",
         "Read_Block_Get_P99_us_Avg",
         "SST_Read_P99_us_Avg",
-        "DB_Get_P99_us_Avg",
+        "DB_Seek_P99_us_Avg",
+        "TableOpenIO_P99_us_Avg"
+      ]
+    },
+    {
+      "out": "chart_stat_p99_write.svg",
+      "title": "STATISTICS P99 Write (us, avg)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
         "DB_Write_P99_us_Avg",
-        "DB_Seek_P99_us_Avg"
+        "Compaction_Outfile_Sync_P99_us_Avg",
+        "Table_Sync_P99_us_Avg",
+        "Manifest_Sync_P99_us_Avg"
       ]
     },
     {

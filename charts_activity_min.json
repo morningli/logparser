@@ -1,0 +1,138 @@
+{
+  "fileTypes": {
+    "LOG": "LOG*",
+    "SLOWLOG": "pika.ERROR*"
+  },
+  "bucket": "10m",
+  "groups": [
+    {
+      "out": "chart_db_wal.svg",
+      "title": "DB Ingest / WAL (MB/s)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "DB_Ingest_MBps_Sum",
+        "WAL_MBps_Sum"
+      ]
+    },
+    {
+      "out": "chart_stat_p99_read.svg",
+      "title": "STATISTICS P99 Read (us, avg)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "DB_Get_P99_us_Avg",
+        "Read_Block_Get_P99_us_Avg",
+        "SST_Read_P99_us_Avg",
+        "DB_Seek_P99_us_Avg",
+        "TableOpenIO_P99_us_Avg"
+      ]
+    },
+    {
+      "out": "chart_stat_p99_write.svg",
+      "title": "STATISTICS P99 Write (us, avg)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "DB_Write_P99_us_Avg",
+        "Compaction_Outfile_Sync_P99_us_Avg",
+        "Table_Sync_P99_us_Avg",
+        "Manifest_Sync_P99_us_Avg"
+      ]
+    },
+    {
+      "out": "chart_bpr_p99.svg",
+      "title": "Bytes per Read (P99)",
+      "type": "LOG",
+      "agg": "avg",
+      "names": [
+        "BytesPerRead_P99_Avg"
+      ]
+    },
+    {
+      "out": "chart_data_cf_files.svg",
+      "title": "data_cf Per-level Files",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Files_data_cf_Sum",
+        "Level1_Files_data_cf_Sum",
+        "Level2_Files_data_cf_Sum",
+        "Level3_Files_data_cf_Sum",
+        "Level4_Files_data_cf_Sum",
+        "Level5_Files_data_cf_Sum",
+        "Level6_Files_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_files.svg",
+      "title": "default CF Per-level Files",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Files_default_Sum",
+        "Level1_Files_default_Sum",
+        "Level2_Files_default_Sum",
+        "Level3_Files_default_Sum",
+        "Level4_Files_default_Sum",
+        "Level5_Files_default_Sum",
+        "Level6_Files_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_data_cf_size.svg",
+      "title": "data_cf Per-level Size (MB)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Size_MB_data_cf_Sum",
+        "Level1_Size_MB_data_cf_Sum",
+        "Level2_Size_MB_data_cf_Sum",
+        "Level3_Size_MB_data_cf_Sum",
+        "Level4_Size_MB_data_cf_Sum",
+        "Level5_Size_MB_data_cf_Sum",
+        "Level6_Size_MB_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_size.svg",
+      "title": "default CF Per-level Size (MB)",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Level0_Size_MB_default_Sum",
+        "Level1_Size_MB_default_Sum",
+        "Level2_Size_MB_default_Sum",
+        "Level3_Size_MB_default_Sum",
+        "Level4_Size_MB_default_Sum",
+        "Level5_Size_MB_default_Sum",
+        "Level6_Size_MB_default_Sum"
+      ]
+    },
+    {
+      "out": "chart_data_cf_gb.svg",
+      "title": "data_cf Interval GB",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Compaction_Write_GB_data_cf_Sum",
+        "Compaction_Read_GB_data_cf_Sum",
+        "Flush_GB_data_cf_Sum",
+        "Add_GB_data_cf_Sum"
+      ]
+    },
+    {
+      "out": "chart_default_cf_gb.svg",
+      "title": "default CF Interval GB",
+      "type": "LOG",
+      "agg": "sum",
+      "names": [
+        "Compaction_Write_GB_default_Sum",
+        "Compaction_Read_GB_default_Sum",
+        "Flush_GB_default_Sum",
+        "Add_GB_default_Sum"
+      ]
+    }
+  ]
+}
+
