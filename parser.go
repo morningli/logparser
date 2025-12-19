@@ -29,8 +29,8 @@ const (
 // all following non-timestamp lines; for DUMPING STATS, it also includes the immediate
 // next timestamped DB Stats header ([/db_impl.cc:670]) and its continuation.
 type LogItem struct {
-	StartTime time.Time   // head timestamp
-	Lines     []string // all lines belonging to this logical item (without trimming)
+	StartTime time.Time // head timestamp
+	Lines     []string  // all lines belonging to this logical item (without trimming)
 	Type      LogType
 }
 
@@ -77,6 +77,10 @@ func (p *RocksDLogParser) Close() error {
 func (p *RocksDLogParser) Seek(at time.Time) error {
 	if p.file == nil {
 		return errors.New("parser closed")
+	}
+	// Fast path: if the file's last head timestamp is not after 'at', return EOF quickly.
+	if ok, _ := p.fastHasAnyAfter(at); !ok {
+		return ioEOF()
 	}
 	// scan until we find a head with ts >= at
 	for {
@@ -178,6 +182,46 @@ func (p *RocksDLogParser) buildItemFromHead(head string) LogItem {
 	}
 	p.cur = &item
 	return item
+}
+
+// fastHasAnyAfter checks the tail of the RocksDB LOG file to see if any head timestamp > at exists.
+func (p *RocksDLogParser) fastHasAnyAfter(at time.Time) (bool, error) {
+	if p.file == nil {
+		return false, errors.New("parser closed")
+	}
+	stat, err := p.file.Stat()
+	if err != nil {
+		return true, nil
+	}
+	size := stat.Size()
+	if size <= 0 {
+		return false, nil
+	}
+	const tailReadBytes int64 = 1024 * 1024
+	start := size - tailReadBytes
+	if start < 0 {
+		start = 0
+	}
+	buf := make([]byte, int(size-start))
+	_, err = p.file.ReadAt(buf, start)
+	if err != nil && !strings.Contains(strings.ToLower(err.Error()), "eof") {
+		// Ignore read-at EOF; otherwise, bail to normal path
+		return true, nil
+	}
+	lastTs := time.Time{}
+	lines := strings.Split(string(buf), "\n")
+	for _, ln := range lines {
+		if t, ok := headTime(ln); ok {
+			if t.After(lastTs) {
+				lastTs = t
+			}
+		}
+	}
+	if lastTs.IsZero() {
+		// Not found: fall back to normal Seek scanning.
+		return true, nil
+	}
+	return lastTs.After(at), nil
 }
 
 func (p *RocksDLogParser) nextLine() (string, bool) {
@@ -302,7 +346,6 @@ func normalizeKey(s string) (string, error) {
 
 func ioEOF() error { return errors.New("EOF") }
 
-
 // PikaSlowLogItemParser groups Pika ERROR slowlog lines into LogItems.
 // Each LogItem corresponds to one request (same command + start_time(s)),
 // and contains the head "command: ..." line and its related NET_DEBUG line(s).
@@ -351,6 +394,10 @@ func (p *PikaSlowLogItemParser) Seek(at time.Time) error {
 	if p.file == nil {
 		return errors.New("parser closed")
 	}
+	// Fast path: if the file's last head timestamp is not after 'at', return EOF quickly.
+	if ok, _ := p.fastHasAnyAfter(at); !ok {
+		return errors.New("EOF")
+	}
 	for {
 		line, ok := p.nextLine()
 		if !ok {
@@ -361,17 +408,138 @@ func (p *PikaSlowLogItemParser) Seek(at time.Time) error {
 			p.tryUpdateCreated(line)
 			continue
 		}
-		// compare head timestamp to target
+		// Fast-forward: if this head is earlier than target time, skip to next head
+		// (avoid spending time on non-head lines between items)
 		if ts.Before(at) {
-			continue
+			for {
+				l2, ok2 := p.nextLine()
+				if !ok2 {
+					return errors.New("EOF")
+				}
+				if t2, isHead2 := p.parseGlogTs(l2); isHead2 {
+					// If still before target, keep skipping; else evaluate this head
+					if t2.Before(at) {
+						continue
+					}
+					// We found a head at/after target; reuse it
+					line = l2
+					isHead = true
+					break
+				} else {
+					p.tryUpdateCreated(l2)
+				}
+			}
 		}
-		// advance until we find a command head
+		// at this point, line is a head with ts >= at; advance until we find a command head
 		if p.isCommandHead(line) {
 			_ = p.buildItemFromHead(line)
 			return nil
 		}
 		// otherwise continue scanning
 	}
+}
+
+// fastHasAnyAfter checks the tail of the file to see if there exists any head timestamp > at.
+// It avoids full-file scanning when the target time is beyond the file's last entry.
+func (p *PikaSlowLogItemParser) fastHasAnyAfter(at time.Time) (bool, error) {
+	if p.file == nil {
+		return false, errors.New("parser closed")
+	}
+	stat, err := p.file.Stat()
+	if err != nil {
+		return true, nil
+	}
+	size := stat.Size()
+	if size <= 0 {
+		return false, nil
+	}
+	// Best-effort: try to detect year from file head if not known.
+	year := p.curYear
+	if year == "" {
+		if y, ok := p.scanYearFromHead(); ok {
+			year = y
+		}
+	}
+	if year == "" {
+		year = "2025"
+	}
+	// Read last chunk of the file (up to 1MB) and find the last head timestamp.
+	const tailReadBytes int64 = 1024 * 1024
+	start := size - tailReadBytes
+	if start < 0 {
+		start = 0
+	}
+	buf := make([]byte, int(size-start))
+	_, err = p.file.ReadAt(buf, start)
+	if err != nil && !strings.Contains(strings.ToLower(err.Error()), "eof") {
+		// Ignore read-at EOF; otherwise, bail to normal path
+		return true, nil
+	}
+	lastTs := time.Time{}
+	lines := strings.Split(string(buf), "\n")
+	for _, ln := range lines {
+		// parseGlogTs requires full line; reuse logic with temporary year
+		t, ok := p.parseGlogTsWithYear(ln, year)
+		if ok {
+			if t.After(lastTs) {
+				lastTs = t
+			}
+		}
+	}
+	if lastTs.IsZero() {
+		// Not found: fall back to normal Seek to be safe.
+		return true, nil
+	}
+	return lastTs.After(at), nil
+}
+
+// scanYearFromHead reads a small prefix of the file and attempts to capture the year from
+// "Log file created at: YYYY/MM/DD ..." lines.
+func (p *PikaSlowLogItemParser) scanYearFromHead() (string, bool) {
+	if p.file == nil {
+		return "", false
+	}
+	const headReadBytes int64 = 128 * 1024
+	buf := make([]byte, headReadBytes)
+	n, err := p.file.ReadAt(buf, 0)
+	if err != nil && n <= 0 {
+		return "", false
+	}
+	data := string(buf[:n])
+	for _, ln := range strings.Split(data, "\n") {
+		s := strings.TrimLeft(strings.TrimPrefix(ln, "LOG:"), " ")
+		if c := p.reCreated.FindStringSubmatch(s); len(c) == 5 {
+			return c[1], true
+		}
+	}
+	return "", false
+}
+
+// parseGlogTsWithYear parses a glog-style head timestamp using a provided year fallback.
+func (p *PikaSlowLogItemParser) parseGlogTsWithYear(line string, year string) (time.Time, bool) {
+	s := strings.TrimLeft(strings.TrimPrefix(line, "LOG:"), " ")
+	m := p.reGlogTs.FindStringSubmatch(s)
+	if len(m) < 4 {
+		return time.Time{}, false
+	}
+	mon, day, hms := m[1], m[2], m[3]
+	mic := ""
+	if len(m) >= 5 {
+		mic = m[4]
+	}
+	if year == "" {
+		year = "2025"
+	}
+	if mic != "" {
+		if t, err := time.ParseInLocation("2006/01/02-15:04:05.000000", year+"/"+mon+"/"+day+"-"+hms+"."+mic, time.Local); err == nil {
+			return t, true
+		}
+	} else {
+		if t, err := time.ParseInLocation("2006/01/02-15:04:05", year+"/"+mon+"/"+day+"-"+hms, time.Local); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
 }
 
 // Next advances to the next slowlog item.
@@ -556,4 +724,3 @@ func (p *PikaSlowLogItemParser) unread(s string) {
 	}
 	p.peekBuf = &s
 }
-
